@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj raspoloženje</title>
+</head>
+<body>
+    <h1>Dodaj raspoloženje</h1>
+    <form method="post">
+        {% csrf_token %}  <!-- Bezbednosni token -->
+        {{ form.as_p }}  <!-- Prikazuje formu -->
+        <button type="submit">Spremi</button>
+    </form>
+    <a href="{% url 'mood_list' %}">Nazad na listu raspoloženja</a>
+</body>
+</html>

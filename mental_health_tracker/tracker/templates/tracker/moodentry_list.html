@@ -1,0 +1,6 @@
+<h1>Raspoloženja</h1>
+<ul>
+    {% for mood in object_list %}
+        <li>{{ mood.date }} - {{ mood.mood }}: {{ mood.note }}</li>
+    {% endfor %}
+</ul>
