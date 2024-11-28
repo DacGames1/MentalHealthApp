@@ -17,9 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from tracker.views import home  # Import home pogleda
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', home, name='home'),  # Dodajte početnu stranicu
     path('admin/', admin.site.urls),
     path('tracker/', include('tracker.urls')),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]

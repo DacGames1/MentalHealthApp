@@ -1,6 +1,132 @@
-<h1>Raspoloženja</h1>
-<ul>
-    {% for mood in object_list %}
-        <li>{{ mood.date }} - {{ mood.mood }}: {{ mood.note }}</li>
-    {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspoloženja - WellMind</title>
+    <style>
+        /* Globalne stilove */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #3498db;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* Lista raspoloženja */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 30px;
+        }
+        li {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* Hover efekat za iteme na listi */
+        li:hover {
+            transform: scale(1.02);
+            background-color: #e8f8f5;
+        }
+
+        li:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .mood-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+        }
+        .mood-date {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .mood-description {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        /* Poveznica za povratak na početnu stranicu */
+        a {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        a:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        /* Formatiranje datuma */
+        .mood-date {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .mood-info {
+                font-size: 1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pregled Raspoloženja</h1>
+        
+        <ul>
+            {% for mood in object_list %}
+                <li>
+                    <div class="mood-info">
+                        <span class="mood-date">{{ mood.date|date:"F j, Y" }}</span>
+                        <span class="mood-description">{{ mood.mood }} - {{ mood.note }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        
+        <!-- Poveznica za povratak na početnu stranicu -->
+        <a href="{% url 'home' %}">Nazad na početnu stranicu</a>
+    </div>
+</body>
+</html>

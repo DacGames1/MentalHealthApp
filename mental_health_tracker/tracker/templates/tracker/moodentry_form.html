@@ -2,15 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dodaj raspoloženje</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .form-element {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-element label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-element input,
+        .form-element select,
+        .form-element textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .form-element textarea {
+            resize: vertical;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+        a:hover {
+            background-color: #2980b9;
+        }
+        .link-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
 </head>
 <body>
-    <h1>Dodaj raspoloženje</h1>
-    <form method="post">
-        {% csrf_token %}  <!-- Bezbednosni token -->
-        {{ form.as_p }}  <!-- Prikazuje formu -->
-        <button type="submit">Spremi</button>
-    </form>
-    <a href="{% url 'mood_list' %}">Nazad na listu raspoloženja</a>
+    <div class="container">
+        <h1>Dodaj raspoloženje</h1>
+        
+        <form method="post">
+            {% csrf_token %}  <!-- Bezbednosni token -->
+            <div class="form-element">
+                <label for="id_date">Datum</label>
+                {{ form.date }}
+            </div>
+            <div class="form-element">
+                <label for="id_mood">Raspoloženje</label>
+                {{ form.mood }}
+            </div>
+            <div class="form-element">
+                <label for="id_note">Napomena</label>
+                {{ form.note }}
+            </div>
+
+            <button type="submit">Spremi</button>
+        </form>
+
+        <!-- Poveznica za povratak na početnu stranicu -->
+        <div class="link-container">
+            <a href="{% url 'home' %}">Nazad na početnu stranicu</a>
+        </div>
+    </div>
 </body>
 </html>

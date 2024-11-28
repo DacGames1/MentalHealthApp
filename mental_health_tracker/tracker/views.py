@@ -4,15 +4,20 @@ from django.views.generic.edit import CreateView
 from django.views.generic import ListView
 from .models import MoodEntry
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 class MoodEntryListView(ListView):
     model = MoodEntry
     template_name = 'tracker/moodentry_list.html'
 def home(request):
-    return HttpResponse("<h1>Dobrodošli u aplikaciju za praćenje mentalnog zdravlja!</h1>")
+    return render(request, 'home.html')
 
-class MoodEntryCreateView(CreateView):
+class MoodEntryCreateView(LoginRequiredMixin, CreateView):
     model = MoodEntry
-    fields = ['mood', 'note']  # Polja koja će se prikazati u formi
-    template_name = 'tracker/moodentry_form.html'  # Lokacija šablona
-    success_url = reverse_lazy('mood_list')  # URL na koji se preusmerava nakon uspešnog unosa
+    fields = ['mood', 'note']
+    template_name = 'tracker/moodentry_form.html'
+    success_url = reverse_lazy('mood_list')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user  # Automatski dodeljuje trenutnog korisnika
+        return super().form_valid(form)
