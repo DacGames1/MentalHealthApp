@@ -20,9 +20,9 @@ from tracker.views import home  # Import home pogleda
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('', home, name='home'),  # Dodajte početnu stranicu
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
-    path('tracker/', include('tracker.urls')),
+    path('tracker/', include('tracker.urls')),  # Ensure this line is present
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]

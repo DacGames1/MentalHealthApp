@@ -57,6 +57,20 @@
             background-color: #2980b9;
         }
 
+        .header .admin-button {
+            margin-left: 20px;
+            padding: 10px 20px;
+            background-color: #e67e22;
+            color: white;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .header .admin-button:hover {
+            background-color: #d35400;
+        }
+
         /* Hero sekcija */
         .hero {
             background: linear-gradient(to right, #3498db, #8e44ad);
@@ -64,14 +78,17 @@
             text-align: center;
             padding: 100px 20px;
         }
+
         .hero h1 {
             font-size: 3.5rem;
             margin-bottom: 20px;
         }
+
         .hero p {
             font-size: 1.25rem;
             margin-bottom: 30px;
         }
+
         .hero a {
             padding: 15px 30px;
             background-color: white;
@@ -80,6 +97,7 @@
             font-size: 1.2rem;
             transition: background-color 0.3s ease;
         }
+
         .hero a:hover {
             background-color: #2980b9;
             color: white;
@@ -92,6 +110,7 @@
             margin: 0 auto;
             text-align: center;
         }
+
         .section p {
             font-size: 1.1rem;
             color: #555;
@@ -113,6 +132,7 @@
             margin: 10px;
             transition: background-color 0.3s ease;
         }
+
         .cta-buttons a:hover {
             background-color: #2980b9;
         }
@@ -137,6 +157,9 @@
         <div class="auth-links">
             {% if user.is_authenticated %}
                 <span>Dobrodošli, {{ user.username }}!</span>
+                {% if user.is_staff %}
+                    <a href="{% url 'manage_users' %}" class="admin-button">Uredi Korisnike</a>
+                {% endif %}
                 <!-- Form for logout -->
                 <form action="{% url 'logout' %}" method="post" style="display:inline;">
                     {% csrf_token %}

@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prijava - WellMind</title>
+    <title>Registracija - WellMind</title>
     <style>
-        /* Basic styling for body */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f7fc;
@@ -14,7 +13,6 @@
             color: #333;
         }
 
-        /* Center the form in the page */
         .container {
             max-width: 400px;
             margin: 50px auto;
@@ -29,7 +27,6 @@
             color: #3498db;
         }
 
-        /* Style for the form fields */
         form {
             display: flex;
             flex-direction: column;
@@ -55,40 +52,17 @@
         form button:hover {
             background-color: #2980b9;
         }
-
-        /* Styling for the register button */
-        .register-btn {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .register-btn a {
-            padding: 10px 20px;
-            background-color: #2ecc71;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .register-btn a:hover {
-            background-color: #27ae60;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Prijava</h1>
+        <h1>Registracija</h1>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Prijavi se</button>
+            {{ user_form.as_p }}
+            {{ profile_form.as_p }}
+            <button type="submit">Registrujte se</button>
         </form>
-
-        <!-- Register button -->
-        <div class="register-btn">
-            <p>Nemate nalog? <a href="{% url 'register' %}">Registrujte se</a></p>
-        </div>
     </div>
 </body>
 </html>
