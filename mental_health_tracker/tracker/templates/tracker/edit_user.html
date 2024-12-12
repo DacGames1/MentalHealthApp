@@ -14,6 +14,7 @@
             color: #333;
         }
 
+        /* Header & Navbar styles */
         .header {
             background-color: #2c3e50;
             color: white;
@@ -28,13 +29,31 @@
             font-weight: bold;
         }
 
+        .nav-links {
+            font-size: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            border-radius: 30px;
+        }
+
+        .nav-links a:hover {
+            background-color: #2980b9;
+        }
+
         h1 {
             color: #3498db;
             text-align: center;
+            margin-top: 20px;
         }
 
         form {
-            max-width: 600px;
+            max-width: 400px;
             margin: 20px auto;
             background-color: white;
             padding: 20px;
@@ -42,7 +61,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        form input, form select, form textarea {
+        form input {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -64,19 +83,65 @@
         form button:hover {
             background-color: #2980b9;
         }
+
+        /* Remove default form button styling */
+        .logout-form button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 30px; /* Make button rounded */
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            outline: none;  /* Removes the outline when clicked */
+        }
+
+        .logout-form button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Ensure there's no additional space or box around the logout button */
+        .logout-form {
+            display: inline-block;
+            margin-left: 20px;
+        }
+
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header with Navbar -->
     <div class="header">
         <div class="logo">WellMind</div>
+        <div class="nav-links">
+            <a href="{% url 'manage_users' %}">Back to Manage Users</a>
+            <!-- Logout Form (styled like home page button) -->
+            
+        </div>
     </div>
 
     <!-- Page Content -->
     <h1>Edit User: {{ user.username }}</h1>
+
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        <!-- Username Field -->
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}" required>
+
+        <!-- Email Field -->
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+
+        <!-- Active Checkbox -->
+        <label for="is_active">Active</label>
+        <input type="checkbox" id="is_active" name="is_active" {% if user.is_active %}checked{% endif %}>
+
+        <!-- Staff Checkbox -->
+        <label for="is_staff">Staff</label>
+        <input type="checkbox" id="is_staff" name="is_staff" {% if user.is_staff %}checked{% endif %}>
+
         <button type="submit">Save Changes</button>
     </form>
 </body>

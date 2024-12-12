@@ -94,3 +94,19 @@ def edit_user(request, user_id):
         form = UserChangeForm(instance=user)
     return render(request, 'tracker/edit_user.html', {'form': form, 'user': user})
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
+
+def delete_user(request, user_id):
+    # Check if the logged-in user is an admin
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not allowed to perform this action.")
+
+    user = get_object_or_404(User, id=user_id)
+
+    # Delete the user
+    user.delete()
+
+    # Redirect to manage users page after deletion
+    return redirect('manage_users')
