@@ -28,16 +28,18 @@ class MoodEntryCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib import messages
+from .forms import UserRegistrationForm, UserProfileForm
+
 def register(request):
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
         profile_form = UserProfileForm(request.POST)
         
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            user.set_password(user.password)  # Ensure the password is hashed
-            user.save()
-
+            user = user_form.save()  # This now handles password hashing
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
@@ -63,12 +65,13 @@ def login_view(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
-        
+
         if user is not None and user.is_active:
             login(request, user)
             return redirect('home')  # Redirect to home page after login
         else:
-            return render(request, 'registration/login.html', {'error': 'Invalid credentials or inactive account'})
+            messages.error(request, "Invalid username or password, or account is inactive.")
+            return redirect('login')  # Optionally, redirect back to login page
 
     return render(request, 'registration/login.html')
 
