@@ -89,12 +89,6 @@
             transform: scale(1.05);
         }
 
-        /* Formatiranje datuma */
-        .mood-date {
-            font-weight: bold;
-            color: #3498db;
-        }
-
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .container {
@@ -121,6 +115,17 @@
                         <span class="mood-date">{{ mood.date|date:"F j, Y" }}</span>
                         <span class="mood-description">{{ mood.mood }} - {{ mood.note }}</span>
                     </div>
+
+                    <!-- Edit and Delete buttons -->
+                    {% if user.is_authenticated and user.is_staff %}
+                        <div class="actions">
+                            <a href="{% url 'edit_mood' mood.id %}" style="background-color: #3498db; color: white;">Edit</a>
+                            <form action="{% url 'delete_mood' mood.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" style="background-color: #e74c3c; color: white;">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>

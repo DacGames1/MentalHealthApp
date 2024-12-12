@@ -28,20 +28,52 @@
             font-weight: bold;
         }
 
-        .nav-links {
-            font-size: 1rem;
+        /* Nav links: Left side (Logo and Back to Home) */
+        .nav-left {
+            display: flex;
+            gap: 15px; /* Adds space between the links on the left */
+            align-items: center;
         }
 
-        .nav-links a {
+        .nav-left a {
             color: white;
             text-decoration: none;
-            margin: 0 15px;
             padding: 10px 20px;
             background-color: #3498db;
             border-radius: 30px;
         }
 
-        .nav-links a:hover {
+        .nav-left a:hover {
+            background-color: #2980b9;
+        }
+
+        /* Nav links: Right side (Create User & Logout) */
+        .nav-right {
+            display: flex;
+            gap: 15px; /* Adds space between the links on the right */
+        }
+
+        .nav-right a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #2ecc71; /* Green color for Create User button */
+            border-radius: 30px;
+        }
+
+        .nav-right a:hover {
+            background-color: #27ae60; /* Darker green on hover */
+        }
+
+        .nav-right button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+
+        .nav-right button:hover {
             background-color: #2980b9;
         }
 
@@ -126,18 +158,23 @@
 <body>
     <!-- Header with Navbar -->
     <div class="header">
-        <div class="logo">WellMind</div>
-        <div class="nav-links">
-            <a href="{% url 'home' %}">Back to Home</a>
+        <div class="nav-left">
+            <div class="logo">WellMind</div>
+            <a href="{% url 'home' %}" class="back-btn">Back to Home</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="{% url 'create_user' %}">Create New User</a>
             <form action="{% url 'logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" style="background-color:#3498db;color:white;border-radius:30px;padding:10px 20px;">Logout</button>
+                <button type="submit">Logout</button>
             </form>
         </div>
     </div>
 
     <!-- Page Content -->
     <h1>Manage Users</h1>
+
     <table>
         <thead>
             <tr>

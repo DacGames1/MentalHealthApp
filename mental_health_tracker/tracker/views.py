@@ -113,3 +113,65 @@ def delete_user(request, user_id):
 
     # Redirect to manage users page after deletion
     return redirect('manage_users')
+
+from django.shortcuts import render, redirect
+from .forms import UserCreationForm
+from django.contrib.auth.decorators import user_passes_test
+
+@user_passes_test(lambda u: u.is_staff)  # Only staff (admins) can access this page
+def create_user(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_users')  # Redirect back to manage users after creating the user
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'tracker/create_user.html', {'form': form})
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseForbidden
+from .forms import MoodForm
+from .models import MoodEntry
+
+def edit_mood(request, mood_id):
+    mood = get_object_or_404(MoodEntry, id=mood_id)
+
+    # Check if user is admin
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = MoodForm(request.POST, instance=mood)
+        if form.is_valid():
+            form.save()
+            # Debugging: print form.errors if any
+            print(form.errors)  # This will print to the console if the form isn't valid
+            return redirect('mood_list')  # Redirect to the mood list page after saving
+        else:
+            print("Form is invalid!")
+            print(form.errors)
+    else:
+        form = MoodForm(instance=mood)
+
+    return render(request, 'tracker/edit_mood.html', {'form': form, 'mood': mood})
+
+
+
+
+# Delete mood
+def delete_mood(request, mood_id):
+    mood = get_object_or_404(MoodEntry, pk=mood_id)
+
+    # Check if user is admin
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        mood.delete()
+        return redirect('mood_list')  # Redirect to the mood list page
+
+    return render(request, 'confirm_delete_mood.html', {'mood': mood})

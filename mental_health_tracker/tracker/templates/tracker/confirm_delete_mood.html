@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Delete</title>
+</head>
+<body>
+    <h2>Are you sure you want to delete this mood entry?</h2>
+    <p>{{ mood.mood }} - {{ mood.note }}</p>
+    <form action="{% url 'delete_mood' mood.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+    </form>
+    <a href="{% url 'mood_list' %}">Cancel</a>
+</body>
+</html>
