@@ -21,10 +21,9 @@ class MoodEntryListView(LoginRequiredMixin, ListView):
     context_object_name = 'object_list'
     
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return MoodEntry.objects.all().order_by('-date')
-        else:
-            return MoodEntry.objects.filter(user=self.request.user).order_by('-date')
+        # Return only entries belonging to the logged-in user
+        return MoodEntry.objects.filter(user=self.request.user).order_by('-date')
+
 
 # CreateView for Mood Entries
 class MoodEntryCreateView(LoginRequiredMixin, CreateView):
@@ -82,6 +81,7 @@ def login_view(request):
 # Manage Users - Staff Only
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import user_passes_test
 
 @user_passes_test(lambda u: u.is_staff)  # Ensure only staff can access this view
 def manage_users(request):
@@ -95,26 +95,35 @@ def manage_users(request):
 
     # Sorting based on filter
     filter_option = request.GET.get('filter')
-    if filter_option == 'abc':
-        users = users.order_by('username')  # Alphabetical order (A-Z)
-    elif filter_option == 'date_created':
-        users = users.order_by('-date_joined')  # Date Created (Most Recent)
+    if filter_option == 'date_created':
+        users = users.order_by('-date_joined')  # Most recent
+    elif filter_option == 'date_created_least':
+        users = users.order_by('date_joined')  # Least recent
 
     return render(request, 'tracker/manage_users.html', {'users': users})
 
 
+
+
 # Edit User - Staff Only
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.decorators import user_passes_test
+
 @user_passes_test(lambda u: u.is_staff)
 def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+    user = get_object_or_404(User, id=user_id)  # Get the user object
     if request.method == 'POST':
-        form = UserChangeForm(request.POST, instance=user)
+        form = UserChangeForm(request.POST, instance=user)  # Bind form to POST data
         if form.is_valid():
-            form.save()
-            return redirect('manage_users')
+            form.save()  # Save the changes
+            return redirect('manage_users')  # Redirect to manage users page
     else:
-        form = UserChangeForm(instance=user)
+        form = UserChangeForm(instance=user)  # Create a form bound to the user object
+    
     return render(request, 'tracker/edit_user.html', {'form': form, 'user': user})
+
 
 # Delete User - Staff Only
 def delete_user(request, user_id):
@@ -138,7 +147,10 @@ def create_user(request):
 
     return render(request, 'tracker/create_user.html', {'form': form})
 
-# Edit Mood Entry
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import MoodEntry
+from .forms import MoodForm
+
 def edit_mood_entry(request, mood_id):
     mood_entry = get_object_or_404(MoodEntry, id=mood_id)
     user = mood_entry.user
@@ -147,11 +159,14 @@ def edit_mood_entry(request, mood_id):
         form = MoodForm(request.POST, instance=mood_entry)
         if form.is_valid():
             form.save()
-            return redirect('user_mood_entries', user_id=user.id)
+            return redirect('user_mood_entries', user_id=user.id)  # Ensure 'user_mood_entries' is a valid URL name
     else:
         form = MoodForm(instance=mood_entry)
 
     return render(request, 'tracker/edit_mood.html', {'form': form, 'mood_entry': mood_entry})
+
+
+
 
 # Delete Mood Entry - Staff Only
 def delete_mood(request, mood_id):

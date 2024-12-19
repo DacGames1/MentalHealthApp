@@ -188,8 +188,8 @@
         <form method="get" action="{% url 'manage_users' %}">
             <input type="text" name="username" placeholder="Search by username" value="{{ request.GET.username }}">
             <select name="filter">
-                <option value="abc" {% if request.GET.filter == 'abc' %}selected{% endif %}>Alphabetical (A-Z)</option>
                 <option value="date_created" {% if request.GET.filter == 'date_created' %}selected{% endif %}>Date Created (Most Recent)</option>
+                <option value="date_created_least" {% if request.GET.filter == 'date_created_least' %}selected{% endif %}>Date Created (Least Recent)</option>
             </select>
             <button type="submit">Apply</button>
         </form>
@@ -214,7 +214,7 @@
                     <td>
                         <div class="actions">
                             <a href="{% url 'edit_user' user.id %}">Edit</a>
-                            <a href="{% url 'user_mood_entries' user.id %}">View Mood Entries</a> <!-- View Mood Entries Link -->
+                            <a href="{% url 'user_mood_entries' user.id %}">View Mood Entries</a>
                             <form action="{% url 'delete_user' user.id %}" method="post" class="delete-form" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit">Delete</button>
@@ -225,7 +225,7 @@
                 {% endfor %}
             {% else %}
             <tr>
-                <td colspan="4">No users found</td> <!-- Adjusted to show 4 columns now -->
+                <td colspan="4">No users found</td>
             </tr>
             {% endif %}
         </tbody>

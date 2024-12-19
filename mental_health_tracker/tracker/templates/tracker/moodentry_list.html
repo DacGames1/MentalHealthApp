@@ -89,6 +89,24 @@
             transform: scale(1.05);
         }
 
+        /* Add Mood button */
+        .add-mood-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 25px;
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .add-mood-btn:hover {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .container {
@@ -107,6 +125,9 @@
 <body>
     <div class="container">
         <h1>Pregled Raspoloženja</h1>
+
+        <!-- Button to add new mood entry -->
+        <a href="{% url 'mood_create' %}" class="add-mood-btn">Unesi novo raspoloženje</a>
         
         <ul>
             {% for mood in object_list %}
