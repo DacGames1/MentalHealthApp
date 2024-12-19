@@ -13,7 +13,6 @@
             color: #333;
         }
 
-        /* Header & Navbar styles */
         .header {
             background-color: #2c3e50;
             color: white;
@@ -28,10 +27,9 @@
             font-weight: bold;
         }
 
-        /* Nav links: Left side (Logo and Back to Home) */
         .nav-left {
             display: flex;
-            gap: 15px; /* Adds space between the links on the left */
+            gap: 15px;
             align-items: center;
         }
 
@@ -47,22 +45,21 @@
             background-color: #2980b9;
         }
 
-        /* Nav links: Right side (Create User & Logout) */
         .nav-right {
             display: flex;
-            gap: 15px; /* Adds space between the links on the right */
+            gap: 15px;
         }
 
         .nav-right a {
             color: white;
             text-decoration: none;
             padding: 10px 20px;
-            background-color: #2ecc71; /* Green color for Create User button */
+            background-color: #2ecc71;
             border-radius: 30px;
         }
 
         .nav-right a:hover {
-            background-color: #27ae60; /* Darker green on hover */
+            background-color: #27ae60;
         }
 
         .nav-right button {
@@ -81,6 +78,35 @@
             text-align: center;
             color: #3498db;
             margin-top: 20px;
+        }
+
+        .search-filter {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-filter input, .search-filter select {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .search-filter button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .search-filter button:hover {
+            background-color: #2980b9;
         }
 
         table {
@@ -139,30 +165,14 @@
             display: flex;
             gap: 10px;
         }
-
-        /* Back button styling */
-        .back-btn {
-            background-color: #3498db;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        .back-btn:hover {
-            background-color: #2980b9;
-        }
     </style>
 </head>
 <body>
-    <!-- Header with Navbar -->
     <div class="header">
         <div class="nav-left">
             <div class="logo">WellMind</div>
-            <a href="{% url 'home' %}" class="back-btn">Back to Home</a>
+            <a href="{% url 'home' %}">Back to Home</a>
         </div>
-
         <div class="nav-right">
             <a href="{% url 'create_user' %}">Create New User</a>
             <form action="{% url 'logout' %}" method="post" style="display:inline;">
@@ -172,36 +182,52 @@
         </div>
     </div>
 
-    <!-- Page Content -->
     <h1>Manage Users</h1>
+
+    <div class="search-filter">
+        <form method="get" action="{% url 'manage_users' %}">
+            <input type="text" name="username" placeholder="Search by username" value="{{ request.GET.username }}">
+            <select name="filter">
+                <option value="abc" {% if request.GET.filter == 'abc' %}selected{% endif %}>Alphabetical (A-Z)</option>
+                <option value="date_created" {% if request.GET.filter == 'date_created' %}selected{% endif %}>Date Created (Most Recent)</option>
+            </select>
+            <button type="submit">Apply</button>
+        </form>
+    </div>
 
     <table>
         <thead>
             <tr>
                 <th>Username</th>
                 <th>Email</th>
+                <th>Date Created</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for user in users %}
+            {% if users %}
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.date_joined|date:"Y-m-d H:i" }}</td> <!-- Date Created -->
+                    <td>
+                        <div class="actions">
+                            <a href="{% url 'edit_user' user.id %}">Edit</a>
+                            <a href="{% url 'user_mood_entries' user.id %}">View Mood Entries</a> <!-- View Mood Entries Link -->
+                            <form action="{% url 'delete_user' user.id %}" method="post" class="delete-form" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
             <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>
-                    <div class="actions">
-                        <!-- Edit User Link -->
-                        <a href="{% url 'edit_user' user.id %}">Edit</a>
-
-                        <!-- Delete User Form -->
-                        <form action="{% url 'delete_user' user.id %}" method="post" class="delete-form">
-                            {% csrf_token %}
-                            <button type="submit">Delete</button>
-                        </form>
-                    </div>
-                </td>
+                <td colspan="4">No users found</td> <!-- Adjusted to show 4 columns now -->
             </tr>
-            {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 </body>

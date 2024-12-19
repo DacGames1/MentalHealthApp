@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Mood Entries - WellMind</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #3498db;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* Mood entries list */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            table-layout: fixed; /* Ensures consistent table layout */
+            overflow-x: auto; /* Enables horizontal scrolling */
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word; /* Ensures text inside table cells wraps */
+        }
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e8f8f5;
+        }
+
+        /* Action buttons */
+        .actions a, .actions button {
+            text-decoration: none;
+            color: #fff;
+            background-color: #3498db;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .actions button {
+            background-color: #e74c3c;
+        }
+
+        .actions a:hover, .actions button:hover {
+            opacity: 0.9;
+        }
+
+        /* Notes section styling */
+        .notes {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-style: italic;
+            color: #7f8c8d;
+            max-width: 100%;  /* Allow note to take full width available in the cell */
+            word-wrap: break-word;  /* Ensure long words break and wrap to the next line */
+            white-space: normal;  /* Allow the text to wrap */
+        }
+
+        /* Header & Navbar styles */
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .nav-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-left a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #3498db;
+            border-radius: 30px;
+        }
+
+        .nav-left a:hover {
+            background-color: #2980b9;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-right a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            border-radius: 30px;
+        }
+
+        .nav-right a:hover {
+            background-color: #27ae60;
+        }
+
+        .nav-right button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+
+        .nav-right button:hover {
+            background-color: #2980b9;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="nav-left">
+            <div class="logo">WellMind</div>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+        </div>
+        <div class="nav-right">
+            <a href="{% url 'manage_users' %}" class="btn btn-secondary">Manage Users</a>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Mood Entries for {{ user.username }}</h1>
+
+        <!-- Back to manage users link -->
+        <a href="{% url 'manage_users' %}" class="btn btn-secondary mb-3">Back to Manage Users</a>
+        
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Mood</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in mood_entries %}
+                    <tr>
+                        <td>{{ entry.date|date:"F j, Y" }}</td>
+                        <td>{{ entry.mood }}</td>
+                        <td>
+                            {% if entry.note %}
+                                <div class="notes">{{ entry.note }}</div>
+                            {% else %}
+                                <div class="notes">No notes available</div>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            <!-- Edit Mood Entry Link -->
+                            <a href="{% url 'edit_mood' entry.id %}">Edit</a>
+
+                            <!-- Delete Mood Entry Form -->
+                            <form action="{% url 'delete_mood' entry.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>

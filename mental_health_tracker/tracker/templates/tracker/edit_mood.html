@@ -1,118 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Mood Entry</title>
-    <style>
-        /* General Page Styling */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            text-align: center;
-            color: #444;
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-weight: bold;
-            color: #555;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1rem;
-            color: #333;
-        }
-
-        textarea {
-            resize: vertical;
-            height: 100px;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        button, a {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            color: #fff;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        button {
-            background-color: #007bff;
-        }
-
-        a {
-            background-color: #6c757d;
-            text-decoration: none;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        a:hover {
-            background-color: #5a6268;
-        }
-
-    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
-    <div class="container">
-        <h2>Edit Mood Entry</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="id_mood">Mood</label>
-                {{ form.mood }}
-            </div>
-        
-            <div class="form-group">
-                <label for="id_note">Note</label>
-                {{ form.note }}
-            </div>
-        
-            <div class="button-container">
-                <button type="submit">Save Changes</button>
-                <a href="{% url 'mood_list' %}">Cancel</a>
-            </div>
-        </form>
-        
-    </div>
+<body class="container mt-5">
+    <h1>Edit Mood Entry</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'user_mood_entries' user_id=mood_entry.user.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
 </body>
 </html>

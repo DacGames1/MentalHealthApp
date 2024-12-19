@@ -1,22 +1,32 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.views.generic.edit import CreateView
-from django.views.generic import ListView
-from .models import MoodEntry
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
-from .forms import UserRegistrationForm, UserProfileForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseForbidden
+from django.contrib.auth import authenticate, login
 from django.contrib import messages
-class MoodEntryListView(ListView):
-    model = MoodEntry
-    template_name = 'tracker/moodentry_list.html'
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, CreateView
+from django.urls import reverse_lazy
+from .models import MoodEntry, User
+from .forms import MoodForm, UserRegistrationForm, UserProfileForm
+
+# Home view
 def home(request):
     return render(request, 'home.html')
 
+# ListView for Mood Entries - Restricted to user-specific entries or all for staff
+class MoodEntryListView(LoginRequiredMixin, ListView):
+    model = MoodEntry
+    template_name = 'tracker/moodentry_list.html'
+    context_object_name = 'object_list'
+    
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return MoodEntry.objects.all().order_by('-date')
+        else:
+            return MoodEntry.objects.filter(user=self.request.user).order_by('-date')
+
+# CreateView for Mood Entries
 class MoodEntryCreateView(LoginRequiredMixin, CreateView):
     model = MoodEntry
     fields = ['mood', 'note']
@@ -24,31 +34,26 @@ class MoodEntryCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('mood_list')
 
     def form_valid(self, form):
-        form.instance.user = self.request.user  # Automatski dodeljuje trenutnog korisnika
+        form.instance.user = self.request.user
         return super().form_valid(form)
 
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.contrib import messages
-from .forms import UserRegistrationForm, UserProfileForm
-
+# User Registration
 def register(request):
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
         profile_form = UserProfileForm(request.POST)
         
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()  # This now handles password hashing
+            user = user_form.save()
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
 
-            login(request, user)  # Log in the user after registration
+            login(request, user)
             messages.success(request, "Registration successful!")
-            return redirect('home')  # Redirect to the homepage or dashboard
+            return redirect('home')
         else:
-            messages.error(request, "There was an error in your form. Please check the details and try again.")
+            messages.error(request, "There was an error in your form. Please check the details.")
     else:
         user_form = UserRegistrationForm()
         profile_form = UserProfileForm()
@@ -57,9 +62,8 @@ def register(request):
         'user_form': user_form,
         'profile_form': profile_form,
     })
-from django.contrib.auth import authenticate, login
-from django.shortcuts import render, redirect
 
+# User Login
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -68,24 +72,39 @@ def login_view(request):
 
         if user is not None and user.is_active:
             login(request, user)
-            return redirect('home')  # Redirect to home page after login
+            return redirect('home')
         else:
-            messages.error(request, "Invalid username or password, or account is inactive.")
-            return redirect('login')  # Optionally, redirect back to login page
+            messages.error(request, "Invalid username or password.")
+            return redirect('login')
 
     return render(request, 'registration/login.html')
 
-from django.contrib.auth.decorators import user_passes_test
+# Manage Users - Staff Only
+from django.shortcuts import render
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserChangeForm
-from django.shortcuts import render, get_object_or_404, redirect
 
 @user_passes_test(lambda u: u.is_staff)  # Ensure only staff can access this view
 def manage_users(request):
+    # Start by getting all users
     users = User.objects.all()
+
+    # Search by username if provided
+    username = request.GET.get('username')
+    if username:
+        users = users.filter(username__icontains=username)
+
+    # Sorting based on filter
+    filter_option = request.GET.get('filter')
+    if filter_option == 'abc':
+        users = users.order_by('username')  # Alphabetical order (A-Z)
+    elif filter_option == 'date_created':
+        users = users.order_by('-date_joined')  # Date Created (Most Recent)
+
     return render(request, 'tracker/manage_users.html', {'users': users})
 
-@user_passes_test(lambda u: u.is_staff)  # Ensure only staff can access this view
+
+# Edit User - Staff Only
+@user_passes_test(lambda u: u.is_staff)
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == 'POST':
@@ -97,81 +116,66 @@ def edit_user(request, user_id):
         form = UserChangeForm(instance=user)
     return render(request, 'tracker/edit_user.html', {'form': form, 'user': user})
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden
-
+# Delete User - Staff Only
 def delete_user(request, user_id):
-    # Check if the logged-in user is an admin
     if not request.user.is_staff:
         return HttpResponseForbidden("You are not allowed to perform this action.")
 
     user = get_object_or_404(User, id=user_id)
-
-    # Delete the user
     user.delete()
-
-    # Redirect to manage users page after deletion
     return redirect('manage_users')
 
-from django.shortcuts import render, redirect
-from .forms import UserCreationForm
-from django.contrib.auth.decorators import user_passes_test
-
-@user_passes_test(lambda u: u.is_staff)  # Only staff (admins) can access this page
+# Create User - Staff Only
+@user_passes_test(lambda u: u.is_staff)
 def create_user(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('manage_users')  # Redirect back to manage users after creating the user
+            return redirect('manage_users')
     else:
         form = UserCreationForm()
 
     return render(request, 'tracker/create_user.html', {'form': form})
 
+# Edit Mood Entry
+def edit_mood_entry(request, mood_id):
+    mood_entry = get_object_or_404(MoodEntry, id=mood_id)
+    user = mood_entry.user
 
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseForbidden
-from .forms import MoodForm
-from .models import MoodEntry
-
-def edit_mood(request, mood_id):
-    mood = get_object_or_404(MoodEntry, id=mood_id)
-
-    # Check if user is admin
-    if not request.user.is_staff:
-        return HttpResponseForbidden()
-
-    if request.method == 'POST':
-        form = MoodForm(request.POST, instance=mood)
+    if request.method == "POST":
+        form = MoodForm(request.POST, instance=mood_entry)
         if form.is_valid():
             form.save()
-            # Debugging: print form.errors if any
-            print(form.errors)  # This will print to the console if the form isn't valid
-            return redirect('mood_list')  # Redirect to the mood list page after saving
-        else:
-            print("Form is invalid!")
-            print(form.errors)
+            return redirect('user_mood_entries', user_id=user.id)
     else:
-        form = MoodForm(instance=mood)
+        form = MoodForm(instance=mood_entry)
 
-    return render(request, 'tracker/edit_mood.html', {'form': form, 'mood': mood})
+    return render(request, 'tracker/edit_mood.html', {'form': form, 'mood_entry': mood_entry})
 
-
-
-
-# Delete mood
+# Delete Mood Entry - Staff Only
 def delete_mood(request, mood_id):
     mood = get_object_or_404(MoodEntry, pk=mood_id)
 
-    # Check if user is admin
     if not request.user.is_staff:
         return HttpResponseForbidden()
 
     if request.method == 'POST':
         mood.delete()
-        return redirect('mood_list')  # Redirect to the mood list page
+        return redirect('user_mood_entries')  # Redirect to a user-specific mood list
 
-    return render(request, 'confirm_delete_mood.html', {'mood': mood})
+    return render(request, 'tracker/confirm_delete_mood.html', {'mood': mood})
+
+# Admin Mood Entry List - Staff Only
+def admin_mood_entry_list(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You do not have permission to view this page.")
+
+    mood_entries = MoodEntry.objects.all()
+    return render(request, 'tracker/admin_mood_entry_list.html', {'mood_entries': mood_entries})
+
+# User Mood Entries
+def user_mood_entries(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    mood_entries = MoodEntry.objects.filter(user=user)
+    return render(request, 'tracker/user_mood_entries.html', {'user': user, 'mood_entries': mood_entries})
