@@ -1,16 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Mood Entry</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body class="container mt-5">
     <h1>Edit Mood Entry</h1>
+    
+    <!-- The form for editing the mood entry -->
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
+        
+        <!-- Save changes button -->
         <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="{% url 'user_mood_entries' user_id=mood_entry.user.id %}" class="btn btn-secondary">Cancel</a>
+        
+        <!-- Cancel button: This will take the user to their appropriate mood list page -->
+        {% if user.is_staff %}
+            <a href="{% url 'user_mood_entries' user_id=mood_entry.user.id %}" class="btn btn-secondary">Cancel</a>
+        {% else %}
+            <a href="{% url 'mood_list' %}" class="btn btn-secondary">Cancel</a>
+        {% endif %}
     </form>
 </body>
 </html>

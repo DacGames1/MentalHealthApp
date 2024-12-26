@@ -150,7 +150,31 @@
         .nav-right button:hover {
             background-color: #2980b9;
         }
+        .actions a {
+        text-decoration: none;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-right: 8px;
+    }
 
+    .actions a:first-of-type {
+        background-color: #3498db; /* Blue for Edit button */
+    }
+
+    .actions a:first-of-type:hover {
+        background-color: #2980b9;
+    }
+
+    .actions a:last-of-type {
+        background-color: #e74c3c; /* Red for Delete button */
+    }
+
+    .actions a:last-of-type:hover {
+        background-color: #c0392b;
+    }
     </style>
 </head>
 <body>
@@ -200,13 +224,11 @@
                         <td class="actions">
                             <!-- Edit Mood Entry Link -->
                             <a href="{% url 'edit_mood' entry.id %}">Edit</a>
-
-                            <!-- Delete Mood Entry Form -->
-                            <form action="{% url 'delete_mood' entry.id %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit">Delete</button>
-                            </form>
+                        
+                            <!-- Link to Confirmation Page for Delete -->
+                            <a href="{% url 'delete_mood' entry.id %}" >Delete</a>
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 </tbody>

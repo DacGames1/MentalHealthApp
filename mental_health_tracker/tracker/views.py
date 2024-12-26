@@ -15,14 +15,40 @@ def home(request):
     return render(request, 'home.html')
 
 # ListView for Mood Entries - Restricted to user-specific entries or all for staff
-class MoodEntryListView(LoginRequiredMixin, ListView):
+from django.shortcuts import render
+from django.views.generic import ListView
+from .models import MoodEntry
+from django.db.models import Q
+
+class MoodEntryListView(ListView):
     model = MoodEntry
-    template_name = 'tracker/moodentry_list.html'
+    template_name = 'tracker/mood_list.html'  # Update this path if necessary
     context_object_name = 'object_list'
-    
+
     def get_queryset(self):
-        # Return only entries belonging to the logged-in user
-        return MoodEntry.objects.filter(user=self.request.user).order_by('-date')
+        # Start with the moods of the logged-in user
+        queryset = MoodEntry.objects.filter(user=self.request.user)
+
+        # Filter by mood (if provided)
+        mood = self.request.GET.get('mood')
+        if mood:
+            queryset = queryset.filter(mood__icontains=mood)
+
+        # Filter by note (if provided)
+        note = self.request.GET.get('note')
+        if note:
+            queryset = queryset.filter(note__icontains=note)
+
+        # Sorting by date (if provided)
+        sort_by_date = self.request.GET.get('sort_by_date')
+        if sort_by_date == 'desc':
+            queryset = queryset.order_by('-date')
+        else:
+            queryset = queryset.order_by('date')
+
+        return queryset
+
+
 
 
 # CreateView for Mood Entries
@@ -130,9 +156,19 @@ def delete_user(request, user_id):
     if not request.user.is_staff:
         return HttpResponseForbidden("You are not allowed to perform this action.")
 
+    # Get the user object to be deleted
     user = get_object_or_404(User, id=user_id)
-    user.delete()
-    return redirect('manage_users')
+
+    if request.method == 'POST':
+        # Delete the user and redirect to manage users page
+        user.delete()
+        return redirect('manage_users')
+
+    # GET request: Render confirmation page
+    return render(request, 'tracker/confirm_delete_user.html', {'user': user})
+
+
+
 
 # Create User - Staff Only
 @user_passes_test(lambda u: u.is_staff)
@@ -148,18 +184,29 @@ def create_user(request):
     return render(request, 'tracker/create_user.html', {'form': form})
 
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseForbidden
 from .models import MoodEntry
 from .forms import MoodForm
 
 def edit_mood_entry(request, mood_id):
+    # Get the mood entry by its ID
     mood_entry = get_object_or_404(MoodEntry, id=mood_id)
-    user = mood_entry.user
+
+    # Check if the logged-in user is the one who created the mood entry or if the user is an admin
+    if mood_entry.user != request.user and not request.user.is_staff:
+        return HttpResponseForbidden("You are not allowed to edit this mood entry.")
 
     if request.method == "POST":
         form = MoodForm(request.POST, instance=mood_entry)
         if form.is_valid():
             form.save()
-            return redirect('user_mood_entries', user_id=user.id)  # Ensure 'user_mood_entries' is a valid URL name
+
+            # Redirect based on user type
+            if request.user.is_staff:
+                return redirect('user_mood_entries', user_id=mood_entry.user.id)  # Admin redirection
+            else:
+                return redirect('mood_list')  # Regular user redirection to their own mood list
+
     else:
         form = MoodForm(instance=mood_entry)
 
@@ -168,18 +215,34 @@ def edit_mood_entry(request, mood_id):
 
 
 
-# Delete Mood Entry - Staff Only
-def delete_mood(request, mood_id):
-    mood = get_object_or_404(MoodEntry, pk=mood_id)
 
-    if not request.user.is_staff:
-        return HttpResponseForbidden()
+# Delete Mood Entry - Staff Only
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import MoodEntry
+from django.http import HttpResponseForbidden
+
+def delete_mood(request, mood_id):
+    entry = get_object_or_404(MoodEntry, id=mood_id)
+
+    # Check if the logged-in user is the one who created the mood entry
+    if entry.user != request.user and not request.user.is_staff:
+        return HttpResponseForbidden("You are not allowed to delete this mood entry.")
 
     if request.method == 'POST':
-        mood.delete()
-        return redirect('user_mood_entries')  # Redirect to a user-specific mood list
+        user_id = entry.user.id
+        entry.delete()
 
-    return render(request, 'tracker/confirm_delete_mood.html', {'mood': mood})
+        # If admin, redirect to the user's mood entries
+        if request.user.is_staff:
+            return redirect('user_mood_entries', user_id=user_id)
+        else:
+            # Regular user, redirect to the general mood list
+            return redirect('mood_list')
+
+    return render(request, 'tracker/confirm_delete.html', {'entry': entry, 'type': 'mood'})
+
+
+
 
 # Admin Mood Entry List - Staff Only
 def admin_mood_entry_list(request):

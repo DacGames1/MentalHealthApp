@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raspoloženja - WellMind</title>
     <style>
+        /* Your existing styles */
         /* Globalne stilove */
         body {
             font-family: 'Arial', sans-serif;
@@ -27,6 +28,30 @@
             color: #3498db;
             font-size: 2.5rem;
             margin-bottom: 20px;
+        }
+
+        /* Filter forms */
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f1f1;
+        }
+        .filters select, .filters input[type="text"], .filters button {
+            padding: 8px 15px;
+            font-size: 1rem;
+            margin-right: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .filters button {
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+        .filters button:hover {
+            background-color: #2980b9;
         }
 
         /* Lista raspoloženja */
@@ -119,16 +144,41 @@
                 font-size: 1rem;
             }
         }
-
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Pregled Raspoloženja</h1>
 
+        <!-- Filters Form -->
+        <div class="filters">
+            <form method="get" action="{% url 'mood_list' %}" style="flex-grow: 1;">
+                <!-- Filter by Mood -->
+                <select name="mood">
+                    <option value="">Select Mood</option>
+                    <option value="Happy" {% if request.GET.mood == 'Happy' %}selected{% endif %}>Happy</option>
+                    <option value="Sad" {% if request.GET.mood == 'Sad' %}selected{% endif %}>Sad</option>
+                    <option value="Angry" {% if request.GET.mood == 'Angry' %}selected{% endif %}>Angry</option>
+                    <option value="Anxious" {% if request.GET.mood == 'Anxious' %}selected{% endif %}>Anxious</option>
+                    <option value="Neutral" {% if request.GET.mood == 'Neutral' %}selected{% endif %}>Neutral</option>
+                </select>
+
+                <!-- Search by Notes -->
+                <input type="text" name="note" placeholder="Search by note" value="{{ request.GET.note }}">
+
+                <!-- Sort by Date -->
+                <select name="sort_by_date">
+                    <option value="asc" {% if request.GET.sort_by_date == 'asc' %}selected{% endif %}>Sort by Date (Asc)</option>
+                    <option value="desc" {% if request.GET.sort_by_date == 'desc' %}selected{% endif %}>Sort by Date (Desc)</option>
+                </select>
+
+                <button type="submit">Apply Filters</button>
+            </form>
+        </div>
+
         <!-- Button to add new mood entry -->
         <a href="{% url 'mood_create' %}" class="add-mood-btn">Unesi novo raspoloženje</a>
-        
+
         <ul>
             {% for mood in object_list %}
                 <li>
@@ -137,21 +187,21 @@
                         <span class="mood-description">{{ mood.mood }} - {{ mood.note }}</span>
                     </div>
 
-                    <!-- Edit and Delete buttons -->
-                    {% if user.is_authenticated and user.is_staff %}
+                    <!-- Edit and Delete buttons only for the user who created the mood entry -->
+                    {% if user.is_authenticated and mood.user == user %}
                         <div class="actions">
                             <a href="{% url 'edit_mood' mood.id %}" style="background-color: #3498db; color: white;">Edit</a>
                             <form action="{% url 'delete_mood' mood.id %}" method="post" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" style="background-color: #e74c3c; color: white;">Delete</button>
-                            </form>
+                            </form>                            
                         </div>
                     {% endif %}
                 </li>
             {% endfor %}
         </ul>
-        
-        <!-- Poveznica za povratak na početnu stranicu -->
+
+        <!-- Link to go back to the homepage -->
         <a href="{% url 'home' %}">Nazad na početnu stranicu</a>
     </div>
 </body>

@@ -215,10 +215,10 @@
                         <div class="actions">
                             <a href="{% url 'edit_user' user.id %}">Edit</a>
                             <a href="{% url 'user_mood_entries' user.id %}">View Mood Entries</a>
-                            <form action="{% url 'delete_user' user.id %}" method="post" class="delete-form" style="display:inline;">
+                            <form action="{% url 'delete_user' user.id %}" method="get" class="delete-form" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit">Delete</button>
-                            </form>
+                            </form>                                                                   
                         </div>
                     </td>
                 </tr>
