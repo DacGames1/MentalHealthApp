@@ -65,3 +65,10 @@ class MoodForm(forms.ModelForm):
         model = MoodEntry
         fields = ['user', 'mood', 'note']
 
+from django import forms
+from django.contrib.auth.models import User
+
+class CustomUserChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'is_active', 'is_staff']  # ✅ Dodano da se sigurno spremaju

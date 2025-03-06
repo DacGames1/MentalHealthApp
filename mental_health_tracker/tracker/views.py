@@ -131,24 +131,30 @@ def manage_users(request):
 
 
 
-# Edit User - Staff Only
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
+from .forms import CustomUserChangeForm
+from django.contrib.auth.models import User
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_staff)  # ✅ Samo staff može editovati
 def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)  # Get the user object
+    user = get_object_or_404(User, id=user_id)
+
     if request.method == 'POST':
-        form = UserChangeForm(request.POST, instance=user)  # Bind form to POST data
+        form = CustomUserChangeForm(request.POST, instance=user)  # ✅ Koristi CustomUserChangeForm
         if form.is_valid():
-            form.save()  # Save the changes
-            return redirect('manage_users')  # Redirect to manage users page
+            form.save()
+            messages.success(request, "User details updated successfully!")  # ✅ Dodana poruka
+            return redirect('manage_users')  # ✅ Sada će te vratiti nazad
+        else:
+            messages.error(request, "Error updating user. Please check the form.")  # ✅ Ako ima grešaka
     else:
-        form = UserChangeForm(instance=user)  # Create a form bound to the user object
-    
+        form = CustomUserChangeForm(instance=user)
+
     return render(request, 'tracker/edit_user.html', {'form': form, 'user': user})
+
+
 
 
 # Delete User - Staff Only
